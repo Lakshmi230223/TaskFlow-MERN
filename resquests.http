@@ -1,0 +1,29 @@
+
+### Create a task
+POST http://localhost:5000/api/tasks
+Content-Type: application/json
+
+{
+  "title": "Learn MERN stack",
+  "description": "Build my TaskFlow application",
+  "priority": "High",
+  "completed": false
+}
+
+### Get all tasks
+GET http://localhost:5000/api/tasks
+
+
+### Update a task
+PUT http://localhost:5000/api/tasks/6ad9f11dfb8a4e11e93decd7
+Content-Type: application/json
+
+{
+  "completed": true
+}
+
+
+###
+
+### Delete a task
+DELETE http://localhost:5000/api/tasks/6ad9f11dfb8a4e11e93decd7
