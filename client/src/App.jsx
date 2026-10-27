@@ -231,7 +231,7 @@ function App() {
         <header className="topbar">
           <div>
             <p className="eyebrow">YOUR WORKSPACE</p>
-            <h1>Task Management</h1>
+            <h1>Task Management Dashboard</h1>
           </div>
           <span className="today">Personal Dashboard</span>
         </header>
