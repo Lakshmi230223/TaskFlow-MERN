@@ -14,6 +14,7 @@ function App() {
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('') 
   const [editingTaskId, setEditingTaskId] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
 
   // Convert a MongoDB task into the format used by our dashboard.
   function formatTask(task) {
@@ -192,10 +193,18 @@ function App() {
       setError(err.message || 'Unable to delete task.')
     }
   }
+  
+  const visibleTasks = tasks.filter(task => {
+    const matchesStatus =
+      filter === 'All' || task.status === filter
 
-  const visibleTasks = tasks.filter(task =>
-    filter === 'All' || task.status === filter
-  )
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase())
+
+    return matchesStatus && matchesSearch
+  })
+
 
   const completed = tasks.filter(
     task => task.status === 'Completed'
@@ -323,6 +332,16 @@ function App() {
               </button>
             ))}
           </div>
+
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search tasks by title..."
+            value={searchTerm}
+            onChange={event => setSearchTerm(event.target.value)}
+            aria-label="Search tasks by title"
+          />
+
 
           <div className="task-list">
             {loading ? (

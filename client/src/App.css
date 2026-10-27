@@ -438,3 +438,27 @@ footer {
     margin-left: 29px;
   }
 }
+
+.search-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin: 16px 0;
+  border: 1px solid #dfe3ef;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: #7057e8;
+  box-shadow: 0 0 0 3px rgba(112, 87, 232, 0.12);
+}
+
+.search-input::placeholder {
+  color: #8a91a5;
+}
