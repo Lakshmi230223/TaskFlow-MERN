@@ -348,7 +348,7 @@ function App() {
               <p className="empty-state">Loading tasks...</p>
             ) : visibleTasks.length === 0 ? (
               <p className="empty-state">
-                No tasks here yet. Add a task to get started!
+                No matching tasks found. Try another search.
               </p>
             ) : (
               visibleTasks.map(task => (
