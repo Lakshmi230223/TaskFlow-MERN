@@ -1,4 +1,8 @@
 
+/* ========================================
+   MAIN APPLICATION LAYOUT
+======================================== */
+
 #root {
   min-height: 100vh;
 }
@@ -6,14 +10,18 @@
 .app {
   min-height: 100vh;
   display: flex;
-  background: #f6f7fb;
+  background: #f6f7fc;
   color: #20243a;
 }
+
+/* ========================================
+   SIDEBAR
+======================================== */
 
 .sidebar {
   width: 230px;
   flex-shrink: 0;
-  background: #fff;
+  background: #ffffff;
   border-right: 1px solid #e9eaf1;
   padding: 30px 20px;
   display: flex;
@@ -23,7 +31,9 @@
 .brand {
   margin: 0 0 48px;
   font-size: 25px;
+  font-weight: 800;
   letter-spacing: -1px;
+  color: #20243a;
 }
 
 .brand span {
@@ -38,11 +48,24 @@
   color: #858aa0;
 }
 
+.side-label {
+  margin-bottom: 12px;
+}
+
 .nav-item {
+  display: block;
   padding: 13px;
   margin: 5px 0;
-  border-radius: 9px;
+  border-radius: 10px;
   color: #73788e;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:hover {
+  background: #f5f3ff;
+  color: #6550d9;
 }
 
 .nav-item.active {
@@ -57,6 +80,10 @@
   font-size: 12px;
   line-height: 1.7;
 }
+
+/* ========================================
+   MAIN CONTENT AND HEADER
+======================================== */
 
 .main-content {
   flex: 1;
@@ -74,9 +101,16 @@
   gap: 16px;
 }
 
+.topbar {
+  margin-bottom: 24px;
+}
+
 .topbar h1 {
-  margin: 5px 0 24px;
+  margin: 5px 0 0;
   font-size: 29px;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+  color: #20243a;
 }
 
 .eyebrow {
@@ -89,15 +123,28 @@
   font-size: 13px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ========================================
+   WELCOME BANNER
+======================================== */
+
 .welcome {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(120deg, #6855dc, #9583f5);
   color: white;
-  border-radius: 17px;
-  padding: 28px;
+  border-radius: 18px;
+  padding: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  box-shadow: 0 8px 22px rgba(104, 85, 220, 0.16);
 }
 
 .light {
@@ -106,6 +153,7 @@
 
 .welcome h2 {
   font-size: 25px;
+  font-weight: 700;
   margin: 12px 0 8px;
 }
 
@@ -113,11 +161,13 @@
   margin-bottom: 0;
   color: #f0edff;
   font-size: 14px;
+  line-height: 1.6;
 }
 
 .welcome-icon {
   width: 62px;
   height: 62px;
+  flex-shrink: 0;
   border-radius: 18px;
   background: #ffffff25;
   display: grid;
@@ -125,43 +175,68 @@
   font-size: 32px;
 }
 
+/* ========================================
+   STATISTICS CARDS
+======================================== */
+
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin: 22px 0;
+  gap: 18px;
+  margin: 24px 0;
 }
 
 .stat-card,
 .task-panel {
-  background: white;
+  background: #ffffff;
   border: 1px solid #ebecf3;
-  border-radius: 14px;
+  border-radius: 15px;
 }
 
 .stat-card {
-  padding: 22px;
+  padding: 24px;
+  box-shadow: 0 3px 12px rgba(30, 40, 80, 0.035);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(30, 40, 80, 0.07);
 }
 
 .stat-card span {
   display: block;
   color: #7c8195;
   font-size: 13px;
+  font-weight: 500;
 }
 
 .stat-card strong {
   display: block;
   font-size: 30px;
+  font-weight: 750;
   margin-top: 12px;
+  color: #20243a;
 }
 
+/* ========================================
+   TASK PANEL
+======================================== */
+
 .task-panel {
-  padding: 25px;
+  padding: 27px;
+  box-shadow: 0 3px 12px rgba(30, 40, 80, 0.035);
+}
+
+.section-heading {
+  margin-bottom: 22px;
 }
 
 .section-heading h2 {
   margin: 0 0 6px;
   font-size: 21px;
+  font-weight: 700;
+  color: #20243a;
 }
 
 .section-heading p {
@@ -170,10 +245,14 @@
   margin: 0;
 }
 
+/* ========================================
+   TASK CREATION FORM
+======================================== */
+
 .task-form {
   display: grid;
   grid-template-columns: minmax(120px, 1fr) 130px auto;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
   margin-top: 24px;
 }
@@ -183,15 +262,42 @@
 }
 
 .task-form input,
-.task-form select {
+.task-form select,
+.task-form textarea {
   width: 100%;
   min-width: 0;
-  padding: 12px;
+  padding: 12px 14px;
   border: 1px solid #e2e4ed;
-  border-radius: 8px;
-  background: white;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #35415a;
   font: inherit;
   font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.task-form input:focus,
+.task-form select:focus,
+.task-form textarea:focus {
+  outline: none;
+  border-color: #705ce4;
+  box-shadow: 0 0 0 3px rgba(112, 92, 228, 0.1);
+}
+
+.task-form > button {
+  background: #705ce4;
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 650;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.task-form > button:hover {
+  background: #5945cf;
+  transform: translateY(-1px);
 }
 
 button {
@@ -199,15 +305,9 @@ button {
   font: inherit;
 }
 
-.task-form > button {
-  background: #705ce4;
-  color: white;
-  border: 0;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 13px;
-  font-weight: 600;
-}
+/* ========================================
+   FILTER BUTTONS
+======================================== */
 
 .filters {
   display: flex;
@@ -219,9 +319,15 @@ button {
 .filter {
   background: none;
   border: none;
-  padding: 11px 13px;
+  padding: 12px 14px;
   color: #7b8094;
   font-size: 13px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.filter:hover {
+  color: #6854dc;
 }
 
 .active-filter {
@@ -230,12 +336,50 @@ button {
   font-weight: 700;
 }
 
+/* ========================================
+   SEARCH INPUT
+======================================== */
+
+.search-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 15px;
+  margin: 16px 0;
+  border: 1px solid #dfe3ef;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-input:focus {
+  border-color: #7057e8;
+  box-shadow: 0 0 0 3px rgba(112, 87, 232, 0.12);
+}
+
+.search-input::placeholder {
+  color: #8a91a5;
+}
+
+/* ========================================
+   TASK LIST
+======================================== */
+
 .task-row {
   display: flex;
   align-items: center;
   gap: 13px;
-  padding: 17px 0;
+  padding: 19px 12px;
   border-bottom: 1px solid #f0f0f5;
+  border-radius: 9px;
+  transition: background 0.2s;
+}
+
+.task-row:hover {
+  background: #fafaff;
 }
 
 .check {
@@ -246,6 +390,11 @@ button {
   border-radius: 6px;
   background: white;
   color: white;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.check:hover {
+  border-color: #705ce4;
 }
 
 .checked {
@@ -264,11 +413,13 @@ button {
 .task-info strong {
   overflow-wrap: anywhere;
   font-size: 14px;
+  color: #20243a;
 }
 
 .task-info span {
   color: #8a8ea0;
   font-size: 12px;
+  line-height: 1.5;
 }
 
 .task-done {
@@ -276,10 +427,16 @@ button {
   color: #999;
 }
 
+/* ========================================
+   PRIORITY LABELS
+======================================== */
+
 .priority {
-  border-radius: 6px;
-  padding: 6px 9px;
+  flex-shrink: 0;
+  border-radius: 7px;
+  padding: 6px 10px;
   font-size: 11px;
+  font-weight: 600;
 }
 
 .priority-high {
@@ -297,17 +454,66 @@ button {
   color: #25875a;
 }
 
+/* ========================================
+   TASK ACTION BUTTONS
+======================================== */
+
+.edit-button {
+  border: 1px solid #e2e4ed;
+  background: #ffffff;
+  color: #6550d9;
+  padding: 7px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.edit-button:hover {
+  background: #efedff;
+  border-color: #c9c1ff;
+}
+
 .delete-button {
-  border: 0;
+  border: none;
   background: transparent;
   color: #c05c65;
+  padding: 7px 10px;
+  border-radius: 7px;
   font-size: 12px;
+  font-weight: 600;
+  transition: background 0.2s;
 }
+
+.delete-button:hover {
+  background: #fff0f0;
+  color: #b91c1c;
+}
+
+/* Logout */
+.logout-button {
+  padding: 11px 19px;
+  border: none;
+  border-radius: 9px;
+  background: #e74c3c;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.logout-button:hover {
+  background: #c0392b;
+}
+
+/* ========================================
+   EMPTY STATE AND FOOTER
+======================================== */
 
 .empty-state {
   text-align: center;
   color: #85899c;
-  padding: 25px 0;
+  padding: 35px 15px;
   font-size: 14px;
 }
 
@@ -317,6 +523,108 @@ footer {
   color: #9699aa;
   font-size: 12px;
 }
+
+/* ========================================
+   AUTHENTICATION PAGES
+======================================== */
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: #f4f6fb;
+  box-sizing: border-box;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  background: white;
+  border: 1px solid #ebecf3;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.auth-form h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  color: #222;
+  text-align: center;
+}
+
+.auth-form p {
+  color: #666;
+  font-size: 15px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-form label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d5d9e2;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #5267d8;
+  box-shadow: 0 0 0 3px rgba(82, 103, 216, 0.1);
+}
+
+.auth-form button[type="submit"] {
+  width: 100%;
+  padding: 13px;
+  margin-top: 24px;
+  border: none;
+  border-radius: 8px;
+  background: #5267d8;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.auth-form button[type="submit"]:hover {
+  background: #3f52bd;
+}
+
+.auth-form button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-form p button {
+  border: none;
+  background: none;
+  color: #5267d8;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-form .error-message {
+  color: #d93025;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
 
 @media (max-width: 850px) {
   .sidebar {
@@ -333,11 +641,11 @@ footer {
   }
 
   .stat-card {
-    padding: 15px;
+    padding: 17px;
   }
 
   .task-panel {
-    padding: 18px;
+    padding: 20px;
   }
 
   .task-form {
@@ -382,8 +690,17 @@ footer {
     padding: 18px 12px;
   }
 
+  .topbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
   .topbar h1 {
     font-size: 22px;
+  }
+
+  .topbar-actions {
+    gap: 8px;
   }
 
   .today {
@@ -437,28 +754,109 @@ footer {
   .priority {
     margin-left: 29px;
   }
+
+  .auth-form {
+    padding: 28px 22px;
+  }
 }
 
-.search-input {
-  display: block;
+
+/* Login password field with eye icon */
+.login-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  box-sizing: border-box;
-  padding: 12px 14px;
-  margin: 16px 0;
-  border: 1px solid #dfe3ef;
+}
+
+.login-password-wrapper input {
+  width: 100%;
+  padding-right: 48px;
+}
+
+.password-eye-button {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: none;
+  background: transparent;
+  color: #73788e;
+  cursor: pointer;
+}
+
+.password-eye-button:hover {
+  color: #5267d8;
+}
+
+.password-eye-button svg {
+  display: block;
+}
+
+.login-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.login-password-wrapper input {
+  width: 100%;
+  padding-right: 45px;
+}
+
+.password-eye-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #73788e;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.password-eye-button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.password-eye-button:hover {
+  color: #5267d8;
+}
+
+/* ========================================
+   PROFILE AND LOGOUT BUTTONS
+======================================== */
+
+.profile-button {
+  background: #5b5ce2;
+  color: #ffffff;
+  border: none;
+  padding: 12px 22px;
   border-radius: 8px;
-  background: #ffffff;
-  color: #172033;
+  cursor: pointer;
   font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
 }
 
-.search-input:focus {
-  border-color: #7057e8;
-  box-shadow: 0 0 0 3px rgba(112, 87, 232, 0.12);
+.profile-button:hover {
+  background: #4647c5;
+  transform: translateY(-1px);
 }
 
-.search-input::placeholder {
-  color: #8a91a5;
+.profile-button:focus-visible {
+  outline: 3px solid rgba(91, 92, 226, 0.25);
+  outline-offset: 2px;
 }

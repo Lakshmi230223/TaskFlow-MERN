@@ -15,6 +15,20 @@ const taskSchema = new mongoose.Schema(
       trim: true,
     },
 
+    status: {
+      type: String,
+      enum: ['Pending', 'In Progress', 'Completed'],
+      default: 'Pending',
+    },
+
+    // Connect each task to its owner
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+
+    // Kept for compatibility with existing task functionality
     completed: {
       type: Boolean,
       default: false,

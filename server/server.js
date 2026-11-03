@@ -2,17 +2,29 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
+
 const taskRoutes = require('./routes/tasks');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 
 const app = express();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
+app.use(express.json());
+app.use(cookieParser());
+
+app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test route
 app.get('/', (req, res) => {

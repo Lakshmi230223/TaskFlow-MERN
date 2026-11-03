@@ -1,20 +1,47 @@
 
 import { useEffect, useState } from 'react'
 import './App.css'
+import Login from './components/Login'
+import Register from './components/Register'
+import AdminDashboard from './components/AdminDashboard'
+import Profile from './components/Profile'
 
 const API_URL = 'http://localhost:5000/api/tasks'
 
 function App() {
   const [tasks, setTasks] = useState([])
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authError, setAuthError] = useState('')
+  const [authMode, setAuthMode] = useState('login')
   const [title, setTitle] = useState('')
   const [priority, setPriority] = useState('Medium')
   const [filter, setFilter] = useState('All')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [description, setDescription] = useState('')
-  const [dueDate, setDueDate] = useState('') 
+  const [dueDate, setDueDate] = useState('')
   const [editingTaskId, setEditingTaskId] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [status, setStatus] = useState('Pending');
+  const [showProfile, setShowProfile] = useState(false)
+  const [loginFormKey, setLoginFormKey] = useState(0)
+
+  // Handle successful login.
+  function handleLogin(userData) {
+   setUser(userData)
+   setAuthError('')
+   setLoading(true)
+  }
+
+  // Handle successful registration.
+  function handleRegister(userData) {
+   setUser(userData)
+   setAuthError('')
+    setLoading(true)
+  }
+
+
 
   // Convert a MongoDB task into the format used by our dashboard.
   function formatTask(task) {
@@ -24,17 +51,50 @@ function App() {
       description: task.description || '',
       dueDate: task.dueDate || '',
       priority: task.priority || 'Medium',
-      status: task.completed ? 'Completed' : 'Pending',
+      status: task.status || (task.completed ? 'Completed' : 'Pending'),
+
     }
   }
+
+  // Check whether the user is already logged in.
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/me', {
+          credentials: 'include',
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          setUser(data.user)
+        }  else {
+          setUser(null)
+        }
+      } catch (error) {
+        setAuthError('Unable to connect to the server.')
+        setUser(null)
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   // Load tasks from the backend when the page opens.
   useEffect(() => {
     async function fetchTasks() {
+      if (!user) {
+        setTasks([])
+        setLoading(false)
+        return
+      }
       try {
         setError('')
 
-        const response = await fetch(API_URL)
+        const response = await fetch(API_URL, {
+          credentials: 'include',
+        })
 
         if (!response.ok) {
           throw new Error('Could not load tasks from the server.')
@@ -52,10 +112,10 @@ function App() {
     }
 
     fetchTasks()
-  }, [])
+  }, [user])
 
   // Add a task to MongoDB.
-  
+
   // Add a new task or update an existing task.
   async function addTask(event) {
     event.preventDefault()
@@ -70,11 +130,13 @@ function App() {
         description: description.trim(),
         dueDate: dueDate || null,
         priority,
+        status,
       }
 
       const response = await fetch(
         editingTaskId ? `${API_URL}/${editingTaskId}` : API_URL,
         {
+          credentials: 'include',
           method: editingTaskId ? 'PUT' : 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -120,20 +182,59 @@ function App() {
       setError(err.message || 'Unable to save task.')
     }
   }
-  
+
   // Load an existing task into the form for editing.
   function editTask(task) {
     setEditingTaskId(task.id)
     setTitle(task.title)
     setDescription(task.description || '')
     setPriority(task.priority || 'Medium')
-    setDueDate(
-      task.dueDate ? task.dueDate.slice(0, 10) : ''
-    )
-
+    setStatus(task.status || 'Pending');
+    setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : '')
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Handle user logout.
+  async function handleLogout() {
+  try {
+    const response = await fetch(
+      'http://localhost:5000/api/auth/logout',
+      {
+        method: 'POST',
+        credentials: 'include',
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error('Could not log out.')
+    }
+
+    // Clear the current user and dashboard data.
+    setUser(null)
+    setTasks([])
+    setAuthMode('login')
+    setShowProfile(false)
+
+    // Clear dashboard-related state.
+    setTitle('')
+    setDescription('')
+    setDueDate('')
+    setPriority('Medium')
+    setStatus('Pending')
+    setFilter('All')
+    setSearchTerm('')
+    setEditingTaskId(null)
+
+    // Reset the Login component.
+    setLoginFormKey(previous => previous + 1)
+
+     setError('')
+     setAuthError('')
+     setLoading(false)
+    } catch (err) {
+      setError(err.message || 'Unable to log out.')
+    }
+  }
 
 
   // Update task completion in MongoDB.
@@ -148,6 +249,7 @@ function App() {
       setError('')
 
       const response = await fetch(`${API_URL}/${id}`, {
+        credentials: 'include',
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -179,6 +281,7 @@ function App() {
       setError('')
 
       const response = await fetch(`${API_URL}/${id}`, {
+        credentials: 'include',
         method: 'DELETE',
       })
 
@@ -193,7 +296,7 @@ function App() {
       setError(err.message || 'Unable to delete task.')
     }
   }
-  
+
   const visibleTasks = tasks.filter(task => {
     const matchesStatus =
       filter === 'All' || task.status === filter
@@ -214,6 +317,57 @@ function App() {
     task => task.status === 'Pending'
   ).length
 
+  // Show loading while checking the login session.
+    if (authLoading) {
+     return <p>Checking login session...</p>
+    }
+
+  // Show login or registration if the user is not logged in.
+  if (!user) {
+    return authMode === 'login' ? (
+      <Login
+        key={loginFormKey}
+        onLogin={handleLogin}
+        onShowRegister={() => setAuthMode('register')}
+     />
+    ) : (
+      <Register
+        onRegister={handleRegister}
+        onShowLogin={() => setAuthMode('login')}
+      />
+    )
+  }
+
+  // Show the admin dashboard to admin users.
+  if (user.role === 'admin') {
+    if (showProfile) {
+      return (
+       <Profile
+         user={user}
+         onProfileUpdated={setUser}
+         onBack={() => setShowProfile(false)}
+        />
+      )
+    }
+    return (
+      <AdminDashboard
+       onLogout={handleLogout}
+       onShowProfile={() => setShowProfile(true)}
+      />
+    )
+  }
+
+  // Show the profile page when requested.
+  if (showProfile) {
+    return (
+      <Profile
+        user={user}
+        onProfileUpdated={setUser}
+        onBack={() => setShowProfile(false)}
+      />
+    )
+  }
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -233,7 +387,27 @@ function App() {
             <p className="eyebrow">YOUR WORKSPACE</p>
             <h1>Task Management Dashboard</h1>
           </div>
-          <span className="today">Personal Dashboard</span>
+          <div className="topbar-actions">
+            <span className="today">
+              {user.name || user.email}
+           </span>
+
+            <button
+              type="button"
+              className="profile-button"
+              onClick={() => setShowProfile(true)}
+             >
+              My Profile
+            </button>
+
+            <button
+             type="button"
+             className="logout-button"
+             onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </div>
         </header>
 
         <section className="welcome">
@@ -295,11 +469,11 @@ function App() {
 
             <label htmlFor="task-due-date">Due date</label>
             <input
-             id="task-due-date"       
+             id="task-due-date"
              type="date"
              value={dueDate}
               onChange={event => setDueDate(event.target.value)}
-           />     
+           />
 
             <label htmlFor="task-priority">Priority</label>
             <select
@@ -310,6 +484,17 @@ function App() {
               <option>Low</option>
               <option>Medium</option>
               <option>High</option>
+            </select>
+
+            <label htmlFor="status">Status</label>
+            <select
+              id="status"
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+            >
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
 
             <button type="submit">
@@ -422,4 +607,3 @@ function App() {
 }
 
 export default App
-
