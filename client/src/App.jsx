@@ -5,6 +5,17 @@ import Login from './components/Login'
 import Register from './components/Register'
 import AdminDashboard from './components/AdminDashboard'
 import Profile from './components/Profile'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Typography from '@mui/material/Typography'
 
 const API_URL = 'http://localhost:5000/api/tasks'
 
@@ -468,22 +479,51 @@ function App() {
         </section>
 
         <section className="stats">
-          <div className="stat-card">
-            <span>Total tasks</span>
-            <strong>{tasks.length}</strong>
-          </div>
-          <div className="stat-card">
-            <span>Pending tasks</span>
-            <strong>{pending}</strong>
-          </div>
-          <div className="stat-card">
-            <span>Completed tasks</span>
-            <strong>{completed}</strong>
-          </div>
-          <div className="stat-card">
-            <span>In Progress tasks</span>
-            <strong>{inProgress}</strong>
-          </div>
+
+          <Card className="stat-card">
+            <CardContent>
+              <Typography variant="body2" color="text.secondary">
+                Total tasks
+              </Typography>
+              <Typography variant="h4" component="strong">
+                {tasks.length}
+             </Typography>
+            </CardContent>
+          </Card>
+
+          <Card className="stat-card">
+            <CardContent>
+              <Typography variant="body2" color="text.secondary">
+                Pending tasks
+             </Typography>
+             <Typography variant="h4" component="strong">
+               {pending}
+             </Typography>
+           </CardContent>
+          </Card>
+
+         <Card className="stat-card">
+           <CardContent>
+              <Typography variant="body2" color="text.secondary">
+                Completed tasks
+              </Typography>
+              <Typography variant="h4" component="strong">
+                {completed}
+              </Typography>
+            </CardContent>
+         </Card>
+
+         <Card className="stat-card">
+            <CardContent>
+              <Typography variant="body2" color="text.secondary">
+                In Progress tasks
+              </Typography>
+              <Typography variant="h4" component="strong">
+                {inProgress}
+              </Typography>
+            </CardContent>
+         </Card>
+
         </section>
 
         <section className="task-panel">
@@ -503,21 +543,28 @@ function App() {
 
           <form className="task-form" onSubmit={addTask}>
             <label htmlFor="task-title">New task</label>
-            <input
+            <TextField
               id="task-title"
+              label="New task"
               value={title}
               onChange={event => setTitle(event.target.value)}
               placeholder="What do you need to do?"
               required
+              fullWidth
+              size="small"
             />
-            <label htmlFor="task-description">Description</label>
-            <textarea
+            
+            <TextField
               id="task-description"
+              label="Description"
               value={description}
               onChange={event => setDescription(event.target.value)}
               placeholder="Add more details about this task..."
+              multiline
               rows={3}
-            />
+              fullWidth
+              size="small"
+           />
 
             <label htmlFor="task-due-date">Due date</label>
             <input
@@ -527,89 +574,128 @@ function App() {
               onChange={event => setDueDate(event.target.value)}
            />
 
-            <label htmlFor="task-priority">Priority</label>
-            <select
-              id="task-priority"
-              value={priority}
-              onChange={event => setPriority(event.target.value)}
-            >
-              <option>Low</option>
-              <option>Medium</option>
-              <option>High</option>
-            </select>
+            <FormControl fullWidth size="small">
+              <InputLabel id="task-priority-label">
+                Priority
+              </InputLabel>
 
-            <label htmlFor="status">Status</label>
-            <select
-              id="status"
-              value={status}
-              onChange={(event) => setStatus(event.target.value)}
-            >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-            </select>
+              <Select
+                labelId="task-priority-label"
+                id="task-priority"
+                value={priority}
+               label="Priority"
+                onChange={event => setPriority(event.target.value)}
+              >
+                <MenuItem value="Low">Low</MenuItem>
+                <MenuItem value="Medium">Medium</MenuItem>
+                <MenuItem value="High">High</MenuItem>
+              </Select>
+            </FormControl>
 
-            <button type="submit">
-              {editingTaskId ? 'Save changes' : '+ Add task'}
-            </button>
+            <FormControl fullWidth size="small">
+              <InputLabel id="task-status-label">
+                Status
+              </InputLabel>
+
+              <Select
+               labelId="task-status-label"
+                id="status"
+               value={status}
+               label="Status"
+                onChange={(event) => setStatus(event.target.value)}
+              >
+                <MenuItem value="Pending">Pending</MenuItem>
+               <MenuItem value="In Progress">In Progress</MenuItem>
+               <MenuItem value="Completed">Completed</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button
+             type="submit"
+             variant="contained"
+             color="primary"
+            >
+             {editingTaskId ? 'Save changes' : '+ Add task'}
+           </Button>
 
           </form>
 
           <div className="filters">
-            {['All', 'Pending', 'In Progress', 'Completed'].map(item => (
-              <button
-                key={item}
-                className={
-                  filter === item ? 'filter active-filter' : 'filter'
-                }
-                onClick={() => setFilter(item)}
-                type="button"
-              >
-                {item}
-              </button>
-            ))}
+            <Tabs
+              value={filter}
+              onChange={(event, newValue) => setFilter(newValue)}
+              aria-label="Filter tasks by status"
+              variant="scrollable"
+             scrollButtons="auto"
+            >
+              {['All', 'Pending', 'In Progress', 'Completed'].map(item => (
+                <Tab
+                  key={item}
+                  label={item}
+                  value={item}
+               />
+              ))}
+            </Tabs>
           </div>
-
-          <input
+          <TextField
             type="text"
-            className="search-input"
-            placeholder="Search tasks by title..."
-            value={searchTerm}
-            onChange={event => setSearchTerm(event.target.value)}
-            aria-label="Search tasks by title"
-          />
+           placeholder="Search tasks by title..."
+           value={searchTerm}
+           onChange={event => setSearchTerm(event.target.value)}
+           aria-label="Search tasks by title"
+            variant="outlined"
+           size="small"
+           fullWidth
+         />
 
-          <select
-            value={priorityFilter}
-            onChange={event => setPriorityFilter(event.target.value)}
-            className="priority-filter"
-            aria-label="Filter by priority"
-          >
-            <option value="All">All Priorities</option>
-            <option value="High">High Priority</option>
-            <option value="Medium">Medium Priority</option>
-            <option value="Low">Low Priority</option>
-          </select>
+          <div className="task-filter-controls">
 
-          <select
-            value={sortBy}
-            onChange={event => setSortBy(event.target.value)}
-            className="sort-select"
-            aria-label="Sort tasks"
-          >
-            <option value="newest">Recently Created</option>
-            <option value="oldest">Oldest First</option>
-            <option value="priority">Priority: High to Low</option>
-            <option value="dueDate">Due Date: Earliest First</option>
-          </select>
-        
-          <button
-            type="button"
-            className="clear-filters-button"
-            onClick={clearFilters}
-          >
-           Clear All Filters
-          </button>
+            {/* Priority Filter */}
+            <FormControl size="small" className="priority-filter-control">
+              <Select
+                value={priorityFilter}
+                onChange={event => setPriorityFilter(event.target.value)}
+                displayEmpty
+                inputProps={{
+                 'aria-label': 'Filter by priority',
+                }}
+             >
+                <MenuItem value="All">All Priorities</MenuItem>
+                <MenuItem value="High">High Priority</MenuItem>
+                <MenuItem value="Medium">Medium Priority</MenuItem>
+                <MenuItem value="Low">Low Priority</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Sort Dropdown */}
+            <FormControl size="small" className="sort-filter-control">
+              <Select
+                value={sortBy}
+                onChange={event => setSortBy(event.target.value)}
+                displayEmpty
+                inputProps={{
+                  'aria-label': 'Sort tasks',
+                }}
+             >
+               <MenuItem value="newest">Recently Created</MenuItem>
+                <MenuItem value="oldest">Oldest First</MenuItem>
+                <MenuItem value="priority">Priority: High to Low</MenuItem>
+                <MenuItem value="dueDate">Due Date: Earliest First</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Clear Filters */}
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={clearFilters}
+              type="button"
+              className="clear-filters-button"
+            >
+              Clear All Filters
+            </Button>
+
+          </div>
 
           <div className="task-list">
             {loading ? (
@@ -621,40 +707,44 @@ function App() {
             ) : (
               paginatedTasks.map(task => (
                 <article className="task-row" key={task.id}>
-                  <button
-                    className={
-                      task.status === 'Completed'
-                        ? 'check checked'
-                        : 'check'
-                    }
-                    onClick={() => changeStatus(task.id)}
-                    type="button"
-                    aria-label="Toggle task completion"
-                  >
-                    {task.status === 'Completed' ? '✓' : ''}
-                  </button>
-
-                  <div className="task-info">
-                    <strong
+                    <button
                       className={
-                        task.status === 'Completed' ? 'task-done' : ''
+                        task.status === 'Completed'
+                          ? 'check checked'
+                          : 'check'
                       }
+                      onClick={() => changeStatus(task.id)}
+                      type="button"
+                      aria-label="Toggle task completion"
                     >
-                      {task.title}
-                    </strong>
-                     {task.description && (
-                       <span>{task.description} </span>
-                      )}
-                    <select
-                      className={`task-status-select status-${task.status.toLowerCase().replace(' ', '-')}`}
-                      value={task.status}
-                      onChange={event => changeStatus(task.id, event.target.value)}
-                      aria-label={`Change status for ${task.title}`}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Completed">Completed</option>
-                   </select>
+                     {task.status === 'Completed' ? '✓' : ''}
+                    </button>
+
+                    <div className="task-info">
+                      <strong
+                        className={
+                          task.status === 'Completed' ? 'task-done' : ''
+                        }
+                      >
+                        {task.title}
+                      </strong>
+                       {task.description && (
+                         <span>{task.description} </span>
+                       )}
+                      <FormControl size="small">
+                        <Select
+                          className={`task-status-select status-${task.status.toLowerCase().replace(' ', '-')}`}
+                          value={task.status}
+                         onChange={event => changeStatus(task.id, event.target.value)}
+                         inputProps={{
+                           'aria-label': `Change status for ${task.title}`,
+                         }}
+                        >
+                         <MenuItem value="Pending">Pending</MenuItem>
+                         <MenuItem value="In Progress">In Progress</MenuItem>
+                         <MenuItem value="Completed">Completed</MenuItem>
+                        </Select>
+                     </FormControl>
 
                       {task.dueDate && (
                         <span
@@ -663,10 +753,10 @@ function App() {
                             new Date().toLocaleDateString()
                               ? 'due-today'
                               : new Date(task.dueDate) < new Date().setHours(0, 0, 0, 0)
-                               ? 'overdue'
-                               : 'upcoming'
+                              ? 'overdue'
+                              : 'upcoming'
                           }
-                       >
+                        >
                           {new Date(task.dueDate).toLocaleDateString() ===
                           new Date().toLocaleDateString()
                             ? 'Due Today'
@@ -676,59 +766,65 @@ function App() {
                           : {new Date(task.dueDate).toLocaleDateString()}
                         </span>
                       )}                 
-                  </div>
+                    </div>
 
-                  <span
-                    className={`priority priority-${task.priority.toLowerCase()}`}
-                  >
-                    {task.priority}
-                  </span>
+                    <span
+                      className={`priority priority-${task.priority.toLowerCase()}`}
+                    >
+                      {task.priority}
+                    </span>
 
-                  <button
-                   className="edit-button"
-                   onClick={() => editTask(task)}
-                   type="button"
-                  >
-                    Edit
-                  </button>
+                    <Button
+                      className="edit-button"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => editTask(task)}
+                      type="button"
+                   >
+                      Edit
+                   </Button>
 
-                  <button
-                    className="delete-button"
-                    onClick={() => deleteTask(task.id)}
-                    type="button"
-                    aria-label={`Delete ${task.title}`}
-                  >
-                    Delete
-                  </button>
-                </article>
+                    <Button
+                      className="delete-button"
+                      variant="outlined"
+                      color="error"
+                      onClick={() => deleteTask(task.id)}
+                      type="button"
+                     aria-label={`Delete ${task.title}`}
+                    >
+                      Delete
+                    </Button>
+                  </article>
               ))
             )}
             
           </div>
 
           {totalPages > 1 && (
-          <div className="pagination">
-            <button
-              type="button"
-              onClick={() => setCurrentPage(previousPage => previousPage - 1)}
-              disabled={currentPage === 1}
-           >
-              Previous
-            </button>
+            <div className="pagination">
+              <Button
+               type="button"
+               variant="outlined"
+               onClick={() => setCurrentPage(previousPage => previousPage - 1)}
+               disabled={currentPage === 1}
+              >
+               Previous
+              </Button>
 
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
 
-            <button
-              type="button"
-              onClick={() => setCurrentPage(previousPage => previousPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              Next
-           </button>
-         </div>
-        )}
+              <Button
+               type="button"
+               variant="outlined"
+               onClick={() => setCurrentPage(previousPage => previousPage + 1)}
+               disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </section>
 
         <footer>TaskFlow · Built with React, Express and MongoDB</footer>
