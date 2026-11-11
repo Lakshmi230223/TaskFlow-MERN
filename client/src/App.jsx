@@ -26,6 +26,10 @@ function App() {
   const [status, setStatus] = useState('Pending');
   const [showProfile, setShowProfile] = useState(false)
   const [loginFormKey, setLoginFormKey] = useState(0)
+  const [sortBy, setSortBy] = useState('newest')
+  const [priorityFilter, setPriorityFilter] = useState('All')
+  const [currentPage, setCurrentPage] = useState(1)
+  const tasksPerPage = 5
 
   // Handle successful login.
   function handleLogin(userData) {
@@ -236,15 +240,15 @@ function App() {
     }
   }
 
+  function clearFilters() {
+    setFilter('All')
+    setPriorityFilter('All')
+    setSearchTerm('')
+    setSortBy('newest')
+  }
 
   // Update task completion in MongoDB.
-  async function changeStatus(id) {
-    const task = tasks.find(item => item.id === id)
-
-    if (!task) return
-
-    const newCompleted = task.status !== 'Completed'
-
+  async function changeStatus(id, newStatus) {
     try {
       setError('')
 
@@ -255,7 +259,8 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          completed: newCompleted,
+         status: newStatus,
+         completed: newStatus === 'Completed',
         }),
       })
 
@@ -297,17 +302,56 @@ function App() {
     }
   }
 
-  const visibleTasks = tasks.filter(task => {
-    const matchesStatus =
-      filter === 'All' || task.status === filter
+  const visibleTasks = tasks
+    .filter(task => {
+      const matchesStatus =
+       filter === 'All' || task.status === filter
 
-    const matchesSearch = task.title
-      .toLowerCase()
-      .includes(searchTerm.trim().toLowerCase())
+      const matchesSearch = task.title
+        .toLowerCase()
+        .includes(searchTerm.trim().toLowerCase())
 
-    return matchesStatus && matchesSearch
-  })
+      const matchesPriority =
+        priorityFilter === 'All' ||
+        task.priority === priorityFilter
 
+      return matchesStatus && matchesSearch && matchesPriority
+    })
+    .sort((a, b) => {
+     if (sortBy === 'newest') {
+        return new Date(b.createdAt) - new Date(a.createdAt)
+      }
+
+      if (sortBy === 'oldest') {
+       return new Date(a.createdAt) - new Date(b.createdAt)
+      }
+
+      if (sortBy === 'priority') {
+        const priorityOrder = {
+         High: 1,
+         Medium: 2,
+         Low: 3,
+        }
+
+       return priorityOrder[a.priority] - priorityOrder[b.priority]
+      }
+
+      if (sortBy === 'dueDate') {
+       return new Date(a.dueDate || '9999-12-31') -
+              new Date(b.dueDate || '9999-12-31')
+      }
+
+     return 0
+    })
+
+  const totalPages = Math.ceil(visibleTasks.length / tasksPerPage)
+
+  const startIndex = (currentPage - 1) * tasksPerPage
+
+  const paginatedTasks = visibleTasks.slice(
+    startIndex,
+    startIndex + tasksPerPage
+  )
 
   const completed = tasks.filter(
     task => task.status === 'Completed'
@@ -315,6 +359,10 @@ function App() {
 
   const pending = tasks.filter(
     task => task.status === 'Pending'
+  ).length
+
+  const inProgress = tasks.filter(
+   task => task.status === 'In Progress'
   ).length
 
   // Show loading while checking the login session.
@@ -432,6 +480,10 @@ function App() {
             <span>Completed tasks</span>
             <strong>{completed}</strong>
           </div>
+          <div className="stat-card">
+            <span>In Progress tasks</span>
+            <strong>{inProgress}</strong>
+          </div>
         </section>
 
         <section className="task-panel">
@@ -504,7 +556,7 @@ function App() {
           </form>
 
           <div className="filters">
-            {['All', 'Pending', 'Completed'].map(item => (
+            {['All', 'Pending', 'In Progress', 'Completed'].map(item => (
               <button
                 key={item}
                 className={
@@ -527,6 +579,37 @@ function App() {
             aria-label="Search tasks by title"
           />
 
+          <select
+            value={priorityFilter}
+            onChange={event => setPriorityFilter(event.target.value)}
+            className="priority-filter"
+            aria-label="Filter by priority"
+          >
+            <option value="All">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+
+          <select
+            value={sortBy}
+            onChange={event => setSortBy(event.target.value)}
+            className="sort-select"
+            aria-label="Sort tasks"
+          >
+            <option value="newest">Recently Created</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Priority: High to Low</option>
+            <option value="dueDate">Due Date: Earliest First</option>
+          </select>
+        
+          <button
+            type="button"
+            className="clear-filters-button"
+            onClick={clearFilters}
+          >
+           Clear All Filters
+          </button>
 
           <div className="task-list">
             {loading ? (
@@ -536,7 +619,7 @@ function App() {
                 No matching tasks found. Try another search.
               </p>
             ) : (
-              visibleTasks.map(task => (
+              paginatedTasks.map(task => (
                 <article className="task-row" key={task.id}>
                   <button
                     className={
@@ -562,13 +645,37 @@ function App() {
                      {task.description && (
                        <span>{task.description} </span>
                       )}
-                    <span>{task.status}</span>
+                    <select
+                      className={`task-status-select status-${task.status.toLowerCase().replace(' ', '-')}`}
+                      value={task.status}
+                      onChange={event => changeStatus(task.id, event.target.value)}
+                      aria-label={`Change status for ${task.title}`}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                   </select>
 
                       {task.dueDate && (
-                     <span>
-                       Due: {new Date(task.dueDate).toLocaleDateString()}
-                      </span>
-                    )}
+                        <span
+                          className={
+                            new Date(task.dueDate).toLocaleDateString() ===
+                            new Date().toLocaleDateString()
+                              ? 'due-today'
+                              : new Date(task.dueDate) < new Date().setHours(0, 0, 0, 0)
+                               ? 'overdue'
+                               : 'upcoming'
+                          }
+                       >
+                          {new Date(task.dueDate).toLocaleDateString() ===
+                          new Date().toLocaleDateString()
+                            ? 'Due Today'
+                            : new Date(task.dueDate) < new Date().setHours(0, 0, 0, 0)
+                              ? 'Overdue'
+                              : 'Upcoming'}
+                          : {new Date(task.dueDate).toLocaleDateString()}
+                        </span>
+                      )}                 
                   </div>
 
                   <span
@@ -596,7 +703,32 @@ function App() {
                 </article>
               ))
             )}
+            
           </div>
+
+          {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(previousPage => previousPage - 1)}
+              disabled={currentPage === 1}
+           >
+              Previous
+            </button>
+
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage(previousPage => previousPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              Next
+           </button>
+         </div>
+        )}
         </section>
 
         <footer>TaskFlow · Built with React, Express and MongoDB</footer>

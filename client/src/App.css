@@ -860,3 +860,104 @@ footer {
   outline: 3px solid rgba(91, 92, 226, 0.25);
   outline-offset: 2px;
 }
+
+/* Task due-date status */
+
+.task-info span.due-today {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.task-info span.overdue {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.task-info span.upcoming {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.task-status-select {
+  padding: 5px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+/* Task status colors */
+
+.task-status-select.status-pending {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
+
+.task-status-select.status-in-progress {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.task-status-select.status-completed {
+  background-color: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
+}
+
+.priority-filter {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: white;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.clear-filters-button {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clear-filters-button:hover {
+  background-color: #e5e7eb;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination span {
+  color: #374151;
+  font-size: 13px;
+}

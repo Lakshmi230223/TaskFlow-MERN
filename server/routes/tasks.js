@@ -1,3 +1,4 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const Task = require('../models/Task');
@@ -6,24 +7,24 @@ const authMiddleware = require('../middleware/authMiddleware');
 const router = express.Router();
 
 const validStatuses = ['Pending', 'In Progress', 'Completed'];
+const validPriorities = ['Low', 'Medium', 'High'];
 
 function formatTask(task) {
   const data = task.toObject ? task.toObject() : { ...task };
 
-  if (!data.status) {
-    data.status = data.completed ? 'Completed' : 'Pending';
-  }
+  // Keep the completed field consistent with the task status.
+  data.completed = data.status === 'Completed';
 
   return data;
 }
 
-// Protect all routes below this middleware
+// Protect all routes below this middleware.
 router.use(authMiddleware);
 
 // 1. CREATE a task
 router.post('/', async (req, res) => {
   try {
-    const { title, description, priority, dueDate } = req.body;
+    const { title, description, priority, dueDate, status } = req.body;
 
     if (typeof title !== 'string' || !title.trim()) {
       return res.status(400).json({
@@ -31,13 +32,38 @@ router.post('/', async (req, res) => {
       });
     }
 
+    const taskStatus = status || 'Pending';
+
+    if (!validStatuses.includes(taskStatus)) {
+      return res.status(400).json({
+        message: 'Invalid task status',
+      });
+    }
+
+    const taskPriority = priority || 'Medium';
+
+    if (!validPriorities.includes(taskPriority)) {
+      return res.status(400).json({
+        message: 'Invalid task priority',
+      });
+    }
+
+    if (
+      description !== undefined &&
+      typeof description !== 'string'
+    ) {
+      return res.status(400).json({
+        message: 'Description must be a string',
+      });
+    }
+
     const task = await Task.create({
       title: title.trim(),
-      description,
-      priority,
+      description: description || '',
+      priority: taskPriority,
       dueDate: dueDate || null,
-      status: 'Pending',
-      completed: false,
+      status: taskStatus,
+      completed: taskStatus === 'Completed',
       userId: req.user._id,
     });
 
@@ -64,7 +90,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid task ID' });
+      return res.status(400).json({
+        message: 'Invalid task ID',
+      });
     }
 
     const task = await Task.findOne({
@@ -73,7 +101,9 @@ router.get('/:id', async (req, res) => {
     });
 
     if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
+      return res.status(404).json({
+        message: 'Task not found',
+      });
     }
 
     res.status(200).json(formatTask(task));
@@ -86,7 +116,9 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid task ID' });
+      return res.status(400).json({
+        message: 'Invalid task ID',
+      });
     }
 
     const allowedFields = [
@@ -106,19 +138,27 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    if (
-      Object.prototype.hasOwnProperty.call(updates, 'title') &&
-      (typeof updates.title !== 'string' || !updates.title.trim())
-    ) {
+    if (Object.keys(updates).length === 0) {
       return res.status(400).json({
-        message: 'Task title cannot be empty',
+        message: 'No valid fields provided for update',
       });
     }
 
-    if (typeof updates.title === 'string') {
+    // Validate title
+    if (Object.prototype.hasOwnProperty.call(updates, 'title')) {
+      if (
+        typeof updates.title !== 'string' ||
+        !updates.title.trim()
+      ) {
+        return res.status(400).json({
+          message: 'Task title cannot be empty',
+        });
+      }
+
       updates.title = updates.title.trim();
     }
 
+    // Validate description
     if (
       Object.prototype.hasOwnProperty.call(updates, 'description') &&
       typeof updates.description !== 'string'
@@ -128,6 +168,17 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Validate priority
+    if (
+      Object.prototype.hasOwnProperty.call(updates, 'priority') &&
+      !validPriorities.includes(updates.priority)
+    ) {
+      return res.status(400).json({
+        message: 'Invalid task priority',
+      });
+    }
+
+    // Validate status
     if (
       Object.prototype.hasOwnProperty.call(updates, 'status') &&
       !validStatuses.includes(updates.status)
@@ -137,6 +188,7 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Validate completed
     if (
       Object.prototype.hasOwnProperty.call(updates, 'completed') &&
       typeof updates.completed !== 'boolean'
@@ -146,10 +198,16 @@ router.put('/:id', async (req, res) => {
       });
     }
 
+    // Keep status and completed synchronized.
+    // If both are supplied, status takes priority.
     if (Object.prototype.hasOwnProperty.call(updates, 'status')) {
       updates.completed = updates.status === 'Completed';
-    } else if (Object.prototype.hasOwnProperty.call(updates, 'completed')) {
-      updates.status = updates.completed ? 'Completed' : 'Pending';
+    } else if (
+      Object.prototype.hasOwnProperty.call(updates, 'completed')
+    ) {
+      updates.status = updates.completed
+        ? 'Completed'
+        : 'Pending';
     }
 
     const task = await Task.findOneAndUpdate(
@@ -157,12 +215,17 @@ router.put('/:id', async (req, res) => {
         _id: req.params.id,
         userId: req.user._id,
       },
-      updates,
-      { new: true, runValidators: true }
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true,
+      }
     );
 
     if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
+      return res.status(404).json({
+        message: 'Task not found',
+      });
     }
 
     res.status(200).json(formatTask(task));
@@ -175,7 +238,9 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(400).json({ message: 'Invalid task ID' });
+      return res.status(400).json({
+        message: 'Invalid task ID',
+      });
     }
 
     const task = await Task.findOneAndDelete({
@@ -184,7 +249,9 @@ router.delete('/:id', async (req, res) => {
     });
 
     if (!task) {
-      return res.status(404).json({ message: 'Task not found' });
+      return res.status(404).json({
+        message: 'Task not found',
+      });
     }
 
     res.status(200).json({
